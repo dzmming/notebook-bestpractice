@@ -4,7 +4,76 @@
 
 # COMMAND ----------
 
-!wget -q https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/hospitalizations/covid-hospitalizations.csv -O /tmp/covid-hospitalizations.csv
+# MAGIC %md
+# MAGIC #### Download data from the internet
+# MAGIC https://docs.databricks.com/files/download-internet-files.html#language-bash
+# MAGIC
+# MAGIC a)these target files downloaded to the volume storage attached to the driver, use %sh to see these files. The current location for this data is in ephemeral volume storage that is only visible to the driver
+# MAGIC b)Moving data with dbutils, The Databricks Utilities (dbutils) allow you to move files from volume storage attached to the driver to other locations accessible with the DBFS, including external object storage locations you’ve configured access to. 
+# MAGIC c)After you move the data to cloud object storage, you can read the data as normal.
+
+# COMMAND ----------
+
+# !wget -q https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/hospitalizations/covid-hospitalizations.csv -O /tmp/covid-hospitalizations.csv
+
+!wget https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/hospitalizations/covid-hospitalizations.csv -O /tmp/covid-hospitalizations.csv
+
+# COMMAND ----------
+
+# MAGIC %sh 
+# MAGIC curl https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/hospitalizations/covid-hospitalizations.csv --output /tmp/covid-hospitalizations.csv
+
+# COMMAND ----------
+
+# MAGIC %sh
+# MAGIC
+# MAGIC pwd
+
+# COMMAND ----------
+
+# MAGIC %sh ls /tmp/
+
+# COMMAND ----------
+
+!wget  https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/hospitalizations/covid-hospitalizations.csv
+
+# COMMAND ----------
+
+# MAGIC %fs
+# MAGIC ls /tmp
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+
+# dbutils.fs.mv("file:/tmp/covid-hospitalizations.csv", "dbfs:/tmp/covid-hospitalizations.csv")
+dbutils.fs.cp("file:/tmp/covid-hospitalizations.csv", "dbfs:/tmp/covid-hospitalizations.csv")
+
+
+# COMMAND ----------
+
+# MAGIC %fs 
+# MAGIC
+# MAGIC rm /tmp/covid-hospitalizations.csv
+
+# COMMAND ----------
+
+df = spark.read.format("csv").option("header", True).load("/tmp/covid-hospitalizations.csv")
+display(df)
+
+# COMMAND ----------
+
+
+# dbutils.fs.mv("file:/tmp/covid-hospitalizations.csv", "dbfs:/tmp/covid-hospitalizations.csv")
+dbutils.fs.cp("file:/tmp/covid-hospitalizations.csv", "dbfs:/tmp/covid-hospitalizations.csv")
+
+# COMMAND ----------
+
+df = spark.read.format("csv").option("header", True).load("/tmp/covid-hospitalizations.csv")
+display(df)
 
 # COMMAND ----------
 
@@ -14,7 +83,7 @@
 
 import pandas as pd
 
-# read from /tmp, subset for USA, pivot and fill missing values
+# read from /tmp, just is file:/tmp, not dbfs:/tmp, subset for USA, pivot and fill missing values
 df = pd.read_csv("/tmp/covid-hospitalizations.csv")
 df = df[df.iso_code == 'USA']\
      .pivot_table(values='value', columns='indicator', index='date')\
@@ -41,7 +110,7 @@ df.plot(figsize=(13,6), grid=True).legend(loc='upper left')
 
 import pyspark.pandas as ps
 
-clean_cols = df.columns.str.replace(' ', '_')
+# clean_cols = df.columns.str.replace(' ', '_')
 
 # Create pandas on Spark dataframe
 psdf = ps.from_pandas(df)

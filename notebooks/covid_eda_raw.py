@@ -11,6 +11,7 @@
 # MAGIC a)these target files downloaded to the volume storage attached to the driver, use %sh to see these files. The current location for this data is in ephemeral volume storage that is only visible to the driver
 # MAGIC b)Moving data with dbutils, The Databricks Utilities (dbutils) allow you to move files from volume storage attached to the driver to other locations accessible with the DBFS, including external object storage locations you’ve configured access to. 
 # MAGIC c)After you move the data to cloud object storage, you can read the data as normal.
+# MAGIC
 
 # COMMAND ----------
 
@@ -22,6 +23,7 @@
 
 # MAGIC %sh 
 # MAGIC curl https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/hospitalizations/covid-hospitalizations.csv --output /tmp/covid-hospitalizations.csv
+# MAGIC
 
 # COMMAND ----------
 
@@ -35,12 +37,20 @@
 
 # COMMAND ----------
 
+# MAGIC %sh ls /dbfs/tmp/
+
+# COMMAND ----------
+
 !wget  https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/hospitalizations/covid-hospitalizations.csv
+
+#download to /Workspace/Repos/zhadeng@microsoft.com/notebook-bestpractice/notebooks  (os.getcwd())
 
 # COMMAND ----------
 
 # MAGIC %fs
 # MAGIC ls /tmp
+# MAGIC
+# MAGIC
 
 # COMMAND ----------
 
@@ -63,6 +73,19 @@ dbutils.fs.cp("file:/tmp/covid-hospitalizations.csv", "dbfs:/tmp/covid-hospitali
 
 df = spark.read.format("csv").option("header", True).load("/tmp/covid-hospitalizations.csv")
 display(df)
+
+# You can use Spark to read data files. You must provide Spark with the fully qualified path. Workspace files in Repos use the path file:/Workspace/Repos/<user_folder>/<repo_name>/file.
+
+# COMMAND ----------
+
+
+
+import os
+
+print(os.getcwd())
+df2 = spark.read.format("csv").load(f"file:{os.getcwd()}/covid-hospitalizations.csv")
+display(df2)
+
 
 # COMMAND ----------
 

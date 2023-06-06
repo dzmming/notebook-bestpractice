@@ -14,3 +14,9 @@ Going through the example, you will:
 * Optionally, apply CI/CD to the notebooks and the shared code.
 
 The example is hands-on. We recommend working it step-by-step to learn how to apply these techniques to your own Databricks notebooks.
+
+
+dataset:
+https://github.com/owid/covid-19-data/tree/master/public/data/hospitalizations
+https://github.com/owid/covid-19-data.git
+
